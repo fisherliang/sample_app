@@ -3,10 +3,15 @@ module SessionsHelper
 		session[:user_id] = user.id
 	end
 
+
 	def remember(user)
 		user.remember
 		cookies.permanent.signed[:user_id] = user.id
 		cookies.permanent[:remember_token] = user.remember_token
+	end
+
+	def current_user?(user)
+		user == current_user
 	end
 
 	def current_user
@@ -36,5 +41,16 @@ module SessionsHelper
 		forget(current_user)
 		session.delete(:user_id)
 		@current_user = nil
+	end
+
+	#重定向到來源位址，或默許地址
+	def redirect_back_or(default)
+		redirect_to(session[:forwarding_url] || default)
+		session.delete(:forwarding_url)
+	end
+
+	#儲存之後需要獲得的地址
+	def store_location
+		session[:forwarding_url] = request.url if request.get?
 	end
 end
